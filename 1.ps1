@@ -3,19 +3,8 @@ $AdminRole = [System.Security.Principal.WindowsBuiltInRole]::Administrator
 
 if (-not $Elevation.IsInRole($AdminRole)) {
     
-    $scriptPath = "$env:TEMP\1.ps1"
-
-    $psPath = "$env:SystemRoot\System32\WindowsPowerShell\v1.0\powershell.exe"
-
-    $psi = New-Object System.Diagnostics.ProcessStartInfo
-    $psi.FileName = $psPath
-    $psi.Arguments = "-ExecutionPolicy Bypass -File `"$scriptPath`""
-    $psi.WindowStyle = 'Hidden'
-    $psi.CreateNoWindow = $true
-    $psi.UseShellExecute = $false
-    $psi.Verb = "runas"
-
-    [System.Diagnostics.Process]::Start($psi)
+    $arguments = "-ExecutionPolicy Bypass -File " + $myinvocation.MyCommand.Definition
+    Start-Process powershell -ArgumentList $arguments -Verb RunAs -WindowStyle Hidden
     exit
 }
 
